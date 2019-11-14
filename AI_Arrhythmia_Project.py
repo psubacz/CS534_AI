@@ -32,18 +32,24 @@ def class_to_onehot(class_label):
 def onehot_to_class(onehot_array):
     H = np.zeros((onehot_array.shape[0],))
     for i in range(0,onehot_array.shape[0]):
-        #Get the index of the one hot array and convert to singleton list
-        H[i] = np.where(onehot_array[i] == 1)[0]
+        # TODO figure out the best way to do this
+        # if there was no predicted value assume Other (16)
+        if np.where(onehot_array[i] == 1)[0].size == 0:
+            H[i] = 0
+        else:
+            #Get the index of the one hot array and convert to singleton list
+            H[i] = np.where(onehot_array[i] == 1)[0]
     return H
 
 #Parse a data file and return the features and labels as a numpy ndarray
-features,labels = di.parse_data_file('arrhythmia.csv') 
+features, labels = di.parse_data_file('arrhythmia.csv') 
 
-#Calculate missing valeus and subsitute into missing field
+features = features.to_numpy()
+labels = labels.to_numpy()
+
 X = np.zeros((9,features.shape[0]))
 for i in np.arange(0,9):
     X[i] = features.T[i]
-
 X= np.array(X).T
 
 #Get a test and test tests at a 10/90 split. 
@@ -65,8 +71,8 @@ model.compile(loss=keras.losses.categorical_crossentropy,
 #Create a one-hot array of answer keys
 Y = class_to_onehot(Y_train)
 
-# x_train and y_train are Nusmpy arrays --just like in the Scikit-Learn API.
-model.fit(X_train, Y, epochs=10000,verbose=1)
+# x_train and y_train are Numpy arrays --just like in the Scikit-Learn API.
+model.fit(X_train, Y, epochs=10000,verbose=0)
 #loss_and_metrics = model.evaluate(X_train, Y, batch_size=128)
 classes = model.predict(X_train, batch_size=128)
 
