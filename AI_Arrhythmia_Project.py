@@ -34,7 +34,7 @@ for i in np.arange(0,9):
 X= np.array(X).T
 
 #Get a test and test tests at a 10/90 split. 
-X_train, X_test, Y_train, Y_test = train_test_split(X, labels, test_size=0.6, random_state=0)
+X_train, X_test, Y_train, Y_test = train_test_split(X, labels, test_size=0.1, random_state=0)
 
 # rfc_classifer = RandomForestClassifier(n_estimators=15, max_depth=16,random_state=0).fit(X_train, Y_train)
 
@@ -50,12 +50,14 @@ model.compile(loss=keras.losses.categorical_crossentropy,
               optimizer=keras.optimizers.SGD(lr=0.01, momentum=0.9, nesterov=True))
 
 #Create a one-hot array of answer keys
-one_hot_labels = keras.utils.to_categorical(Y_train, num_classes=17)
+one_hot_labels_train = keras.utils.to_categorical(Y_train, num_classes=17)
+one_hot_labels_test = keras.utils.to_categorical(Y_test, num_classes=17)
 
 # x_train and y_train are Numpy arrays --just like in the Scikit-Learn API.
-model.fit(X_train, one_hot_labels, epochs=10000,verbose=0)
+model.fit(X_train, one_hot_labels_train, epochs=20000,verbose=0)
 #loss_and_metrics = model.evaluate(X_train, Y, batch_size=128)
-classes = model.predict(X_train, batch_size=128)
+
+classes = model.predict(X_test, batch_size=256)
 
 #Decode onehot array
 hypo = np.argmax(classes, axis=1)
@@ -63,6 +65,6 @@ hypo = np.argmax(classes, axis=1)
 #hypo0 = rfc_classifer.predict(X_train)
 #score0 = f1_score(Y_train, hypo0, average='macro')
 
-score = f1_score(Y_train, hypo, average='macro')
+score = f1_score(Y_test, hypo, average='macro')
 print('F1_Measure: %F' % (score))
 #print('F1_Measure: %F' % (score1))
