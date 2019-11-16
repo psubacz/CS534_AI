@@ -22,25 +22,6 @@ import keras
 from keras.models import Sequential
 from keras.layers import Dense, Activation
 
-
-def class_to_onehot(class_label):
-    Y = np.zeros((class_label.shape[0],16))
-    for i in range(0,class_label.shape[0]):
-        Y[i][int(class_label[i])-1] = 1
-    return Y
-
-def onehot_to_class(onehot_array):
-    H = np.zeros((onehot_array.shape[0],))
-    for i in range(0,onehot_array.shape[0]):
-        # TODO figure out the best way to do this
-        # if there was no predicted value assume Other (16)
-        if np.where(onehot_array[i] == 1)[0].size == 0:
-            H[i] = 0
-        else:
-            #Get the index of the one hot array and convert to singleton list
-            H[i] = np.where(onehot_array[i] == 1)[0]
-    return H
-
 #Parse a data file and return the features and labels as a numpy ndarray
 features, labels = di.parse_data_file('arrhythmia.csv') 
 
