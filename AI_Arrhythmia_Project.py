@@ -23,13 +23,23 @@ from keras.models import Sequential
 from keras.layers import Dense, Activation
 
 #Parse a data file and return the features and labels as a numpy ndarray
-features, labels = di.parse_data_file('arrhythmia.csv') 
+dataset, labels = di.parse_data_file('arrhythmia.csv') 
 
-features = features.to_numpy()
+dataset = dataset[['Age'
+                 , 'Weight'
+                 , 'Average QRS Duration'
+                 , 'Average P-R interval'
+                 , 'Average P interval'
+                 , 'QRS angle'
+                 , 'Heart rate'
+                 ]]
+
+features = dataset.to_numpy()
 labels = labels.to_numpy()
 
-X = np.zeros((9,features.shape[0]))
-for i in np.arange(0,9):
+
+X = np.zeros((len(dataset.columns),features.shape[0]))
+for i in np.arange(0,len(dataset.columns)):
     X[i] = features.T[i]
 X= np.array(X).T
 
@@ -40,11 +50,8 @@ X_train, X_test, Y_train, Y_test = train_test_split(X, labels, test_size=0.1, ra
 
 #agglo_classifer = AgglomerativeClustering(n_clusters=16).fit(X_train)
 model = Sequential()
-model.add(Dense(units=32, activation='relu', input_dim=9))
-model.add(Dense(units=17, activation='softmax'))
-model.compile(loss='categorical_crossentropy',
-              optimizer='sgd',
-              metrics=['accuracy'])
+model.add(Dense(32, activation='relu', input_dim=len(dataset.columns)))
+model.add(Dense(17, activation='softmax'))
 
 model.compile(loss=keras.losses.categorical_crossentropy,
               optimizer=keras.optimizers.SGD(lr=0.01, momentum=0.9, nesterov=True))
@@ -54,10 +61,10 @@ one_hot_labels_train = keras.utils.to_categorical(Y_train, num_classes=17)
 one_hot_labels_test = keras.utils.to_categorical(Y_test, num_classes=17)
 
 # x_train and y_train are Numpy arrays --just like in the Scikit-Learn API.
-model.fit(X_train, one_hot_labels_train, epochs=20000,verbose=0)
+model.fit(X_train, one_hot_labels_train, epochs=5000,verbose=0)
 #loss_and_metrics = model.evaluate(X_train, Y, batch_size=128)
 
-classes = model.predict(X_test, batch_size=256)
+classes = model.predict(X_test, batch_size=64)
 
 #Decode onehot array
 hypo = np.argmax(classes, axis=1)
