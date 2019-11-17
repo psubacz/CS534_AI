@@ -38,14 +38,14 @@ labels = labels.to_numpy()
 
 #Get a test and test tests at a 80/20 split. 
 X_train, X_test, Y_train, Y_test = train_test_split(X, labels, test_size=0.2, random_state=None)
-X_train, X_validate, Y_train, Y_validate = train_test_split(X, labels, test_size=0.2, random_state=None)
+X_train, X_validate, Y_train, Y_validate = train_test_split(X_train, Y_train, test_size=0.3, random_state=None)
 
 
 model = Sequential()
 model.add(Dense(279, activation='relu', input_dim=len(dataset.columns)))
 model.add(Dropout(rate=0.5))
 model.add(Dense(140, activation='relu'))
-model.add(Dropout(rate=0.4))
+model.add(Dropout(rate=0.5))
 model.add(Dense(70, activation='relu'))
 model.add(Dropout(rate=0.4))
 model.add(Dense(35, activation='relu'))
@@ -57,7 +57,7 @@ model.compile(loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 # early stopping to prevent overfitting
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=150)
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=100)
 
 #Create a one-hot array of answer keys
 Y_train = keras.utils.to_categorical(Y_train, num_classes=num_classes)
