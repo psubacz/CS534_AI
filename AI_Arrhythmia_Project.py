@@ -17,72 +17,72 @@ from sklearn.datasets import make_classification
 from sklearn.metrics import f1_score
 from sklearn.model_selection import train_test_split
 
+
 #Keras Modules
 import keras
 from keras.models import Sequential
-from keras.layers import Dense, Activation
+from keras.layers import Dense, Activation, Dropout 
+from keras.callbacks import EarlyStopping
+
+import os
+import tensorflow as tf
+# disable GPU CUDA (its slower)
+os.environ["CUDA_VISIBLE_DEVICES"]="-1"    
 
 #Parse a data file and return the features and labels as a numpy ndarray
-dataset, labels = di.parse_data_file('arrhythmia.csv') 
+dataset, labels, num_classes = di.parse_data_file('arrhythmia.csv') 
 
-dataset = dataset[['Age'
-                 , 'Weight'
-                 , 'Average QRS Duration'
-                 , 'Average P-R interval'
-                 , 'Average P interval'
-                 , 'QRS angle'
-                 , 'Heart rate'
-                 ]]
-
-features = dataset.to_numpy()
+# view data as numpy arrays
+X = dataset.to_numpy()
 labels = labels.to_numpy()
 
-
-X = np.zeros((len(dataset.columns),features.shape[0]))
-for i in np.arange(0,len(dataset.columns)):
-    X[i] = features.T[i]
-X= np.array(X).T
-
-#Get a test and test tests at a 10/90 split. 
-X_train, X_test, Y_train, Y_test = train_test_split(X, labels, test_size=0.1, random_state=0)
+#Get a test and test tests at a 80/20 split. 
+X_train, X_test, Y_train, Y_test = train_test_split(X, labels, test_size=0.2, random_state=None)
+X_train, X_validate, Y_train, Y_validate = train_test_split(X, labels, test_size=0.2, random_state=None)
 
 
-
-# rfc_classifer = RandomForestClassifier(n_estimators=15, max_depth=16,random_state=0).fit(X_train, Y_train)
-
-#agglo_classifer = AgglomerativeClustering(n_clusters=16).fit(X_train)
 model = Sequential()
-model.add(Dense(32, activation='relu', input_dim=len(dataset.columns)))
-model.add(Dense(17, activation='softmax'))
+model.add(Dense(279, activation='relu', input_dim=len(dataset.columns)))
+model.add(Dropout(rate=0.5))
+model.add(Dense(140, activation='relu'))
+model.add(Dropout(rate=0.4))
+model.add(Dense(70, activation='relu'))
+model.add(Dropout(rate=0.4))
+model.add(Dense(35, activation='relu'))
+model.add(Dropout(rate=0.3))
+model.add(Dense(num_classes, activation='softmax'))
 
 model.compile(loss='categorical_crossentropy',
-               optimizer='sgd',
-#               optimizer='adam',
+              optimizer='sgd',
               metrics=['accuracy'])
 
-#model.compile(loss=keras.losses.categorical_crossentropy,
-#              optimizer=keras.optimizers.SGD(lr=0.01, momentum=0.9, nesterov=True))
+# early stopping to prevent overfitting
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=150)
 
 #Create a one-hot array of answer keys
-one_hot_labels_train = keras.utils.to_categorical(Y_train, num_classes=17)
-one_hot_labels_test = keras.utils.to_categorical(Y_test, num_classes=17)
+Y_train = keras.utils.to_categorical(Y_train, num_classes=num_classes)
+Y_test = keras.utils.to_categorical(Y_test, num_classes=num_classes)
+Y_validate = keras.utils.to_categorical(Y_validate, num_classes=num_classes)
 
 # x_train and y_train are Numpy arrays --just like in the Scikit-Learn API.
-model.fit(X_train, one_hot_labels_train, epochs=2048,verbose=0)
-#loss_and_metrics = model.evaluate(X_train, Y, batch_size=128)
+history = model.fit(X_train, Y_train, epochs=10000, verbose=0, use_multiprocessing=True
+          , workers=16, validation_data=(X_validate, Y_validate), callbacks=[es])
 
+_, train_acc = model.evaluate(X_train, Y_train, verbose=0)
+_, test_acc = model.evaluate(X_test, Y_test, verbose=0)
+print('Train: %.3f, Test: %.3f' % (train_acc, test_acc))
 
+plt.plot(history.history['loss'], label='train')
+plt.plot(history.history['val_loss'], label='test')
+plt.legend()
+plt.show()
 
-classes = model.predict(X_test, batch_size=64)
+# run predictions
+#classes = model.predict(X_test, batch_size=64)
 
 #Decode onehot array
-hypo = np.argmax(classes, axis=1)
-
-#hypo0 = rfc_classifer.predict(X_train)
-#score0 = f1_score(Y_train, hypo0, average='macro')
+#hypo = np.argmax(classes, axis=1)
 
 
-
-score = f1_score(Y_test, hypo, average='macro')
-print('F1_Measure: %F' % (score))
-#print('F1_Measure: %F' % (score1))
+#score = f1_score(Y_test, hypo, average='macro')
+#print('F1_Measure: %F' % (score))
