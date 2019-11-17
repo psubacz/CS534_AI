@@ -16,6 +16,8 @@ from sklearn.svm import SVC
 from sklearn.datasets import make_classification
 from sklearn.metrics import f1_score
 from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.multiclass import OneVsRestClassifier
 
 #Classification Methods
 #from neural_network import run_NN
@@ -129,18 +131,22 @@ for i in np.arange(0,len(dataset.columns)):
 X= np.array(X).T
 
 #Get a test and test tests at a 10/90 split. 
-X_train, X_test, Y_train, Y_test = train_test_split(X, labels, test_size=0.1, random_state=0)
+X_train, X_test, Y_train, Y_test = train_test_split(X, labels, test_size=0.1, random_state=None)
 
 #Neural Network Dataset
 #run_NN(X_train, X_test, Y_train, Y_test,dataset)
 
 
 #Random Forest Classifier
-rfc_classifer = RandomForestClassifier(n_estimators=140120, max_depth=100).fit(X_train, Y_train)
-hypo = rfc_classifer.predict(X_train)
+# rfc_classifer = RandomForestClassifier(n_estimators=100, max_depth=5).fit(X_train, Y_train)
+reg = OneVsRestClassifier(LinearRegression()).fit(X_train, Y_train)
+
+# hypo = rfc_classifer.predict(X_train)
+hypo = reg.predict(X_train)
 score = f1_score(Y_train, hypo, average='macro')
 print('F1_Measure: %F' % (score))
-hypo = rfc_classifer.predict(X_test)
+hypo = reg.predict(X_test)
+# score = f1_score(Y_test, hypo, average='macro')
 score = f1_score(Y_test, hypo, average='macro')
 print('F1_Measure: %F' % (score))
 
