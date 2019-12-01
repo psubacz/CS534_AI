@@ -55,7 +55,7 @@ model.compile(loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 # early stopping to prevent overfitting
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=100)
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=150)
 
 #Create a one-hot array of answer keys
 Y_train = keras.utils.to_categorical(Y_train, num_classes=num_classes)
