@@ -43,11 +43,11 @@ X_train, X_validate, Y_train, Y_validate = train_test_split(X_train, Y_train, te
 
 model = Sequential()
 model.add(Dense(279, activation='relu', input_dim=len(dataset.columns)))
-model.add(Dropout(rate=0.5))
+model.add(Dropout(rate=0.6))
 model.add(Dense(150, activation='relu'))
-model.add(Dropout(rate=0.4))
-model.add(Dense(35, activation='relu'))
-model.add(Dropout(rate=0.3))
+model.add(Dropout(rate=0.6))
+model.add(Dense(10, activation='relu'))
+model.add(Dropout(rate=0.6))
 model.add(Dense(num_classes, activation='softmax'))
 
 model.compile(loss='categorical_crossentropy',
@@ -55,7 +55,7 @@ model.compile(loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 # early stopping to prevent overfitting
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=100)
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=2000)
 
 #Create a one-hot array of answer keys
 Y_train = keras.utils.to_categorical(Y_train, num_classes=num_classes)

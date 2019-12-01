@@ -23,6 +23,9 @@ def parse_data_file(data_file):
     dataset.loc[dataset.Class == 16, 'Class'] = 0
     dataset.loc[dataset.Class == 9, 'Class'] = 7
     dataset.loc[dataset.Class == 10, 'Class'] = 8
+    
+    dataset.loc[dataset.Class != 1, 'Class'] = 0
+    
 
     # extract actual classification from data
     y = dataset['Class']
