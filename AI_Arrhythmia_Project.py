@@ -26,6 +26,13 @@ from keras.callbacks import EarlyStopping
 
 import os
 import tensorflow as tf
+from keras import optimizers
+
+# import norm
+from keras.constraints import max_norm
+# instantiate norm
+norm = max_norm(3.0)
+
 # disable GPU CUDA (its slower)
 os.environ["CUDA_VISIBLE_DEVICES"]="-1"    
 
@@ -37,20 +44,20 @@ X = dataset.to_numpy()
 labels = labels.to_numpy()
 
 #Get a test and test tests at a 80/20 split. 
-X_train, X_test, Y_train, Y_test = train_test_split(X, labels, test_size=0.2, random_state=None)
+X_train, X_test, Y_train, Y_test = train_test_split(X, labels, test_size=0.1, random_state=None)
 X_train, X_validate, Y_train, Y_validate = train_test_split(X_train, Y_train, test_size=0.3, random_state=None)
 
 
 model = Sequential()
 model.add(Dense(279, activation='relu', input_dim=len(dataset.columns)))
 model.add(Dropout(rate=0.5))
-model.add(Dense(150, activation='relu'))
-model.add(Dropout(rate=0.4))
-model.add(Dense(10, activation='relu'))
-model.add(Dropout(rate=0.3))
+model.add(Dense(30, activation='relu'))
 model.add(Dense(num_classes, activation='sigmoid'))
 
-model.compile(loss='binary_crossentropy',
+# sgd = optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+#model.compile(loss='mean_squared_error', optimizer=sgd)
+
+model.compile(loss='mean_squared_error',
               optimizer='sgd',
               metrics=['accuracy'])
 
