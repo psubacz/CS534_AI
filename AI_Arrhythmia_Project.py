@@ -27,7 +27,7 @@ for i in range(10):
     param_grid = [
         {'classifier' : [LogisticRegression(max_iter=10000, multi_class='auto')],
         'classifier__penalty' : ['l1', 'l2'],
-        'classifier__C' : np.logspace(-2, 4, 2),
+        'classifier__C' : np.logspace(-2, 4, 6),
         'classifier__solver' : ['liblinear']
         }
     ]
@@ -126,7 +126,7 @@ for i in range(10):
                     , 'V6: QRSA'
                     , 'V6: QRSTA'
                     ]]
-
+    
     features = dataset.to_numpy()
     labels = labels.to_numpy()
 
@@ -160,6 +160,8 @@ for i in range(10):
     score = f1_score(Y_test, hypo, average='macro')
     print('Test: %F' % (score))
 
+
+    print('Best features:', clf.best_estimator_.get_params())
 #Naive Bayes Classifier
 
 
