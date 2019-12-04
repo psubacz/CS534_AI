@@ -13,7 +13,7 @@ def parse_data_file(data_file):
     # read in csv
     dataset = pd.read_csv(data_file)
 
-   # dataset.loc[dataset.Class != 1, 'Class'] = 0
+    dataset.loc[dataset.Class != 1, 'Class'] = 0
 
     # extract actual classification from data
     y = dataset['Class']

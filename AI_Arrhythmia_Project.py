@@ -14,14 +14,24 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.svm import SVC
 from sklearn.datasets import make_classification
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.pipeline import Pipeline
 
+import warnings
+from sklearn.linear_model.cd_fast import ConvergenceWarning
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=ConvergenceWarning)
 
-for i in range(10):
+f1_scores = []
+recall_scores = []
+precision_scores = []
+c_val = []
+penalty_fun = []
+
+for i in range(12):
 
     pipe = Pipeline([('classifier' , RandomForestClassifier())])
     param_grid = [
@@ -152,20 +162,29 @@ for i in range(10):
     clf = GridSearchCV(pipe, param_grid = param_grid, cv = 5, n_jobs=-1).fit(X_train, Y_train)
 
     # hypo = rfc_classifer.predict(X_train)
-    hypo = clf.predict(X_train)
-    score = f1_score(Y_train, hypo, average='macro')
-    print('Train: %F ' % (score), end='')
+    #hypo = clf.predict(X_train)
+    #score = f1_score(Y_train, hypo, average='macro')
+    #print('Train: %F ' % (score), end='')
     hypo = clf.predict(X_test)
-    # score = f1_score(Y_test, hypo, average='macro')
     score = f1_score(Y_test, hypo, average='macro')
-    print('Test: %F' % (score))
+    prec = precision_score(Y_test, hypo, average='macro')
+    rec = recall_score(Y_test, hypo, average='macro')
+
+    # print('Test: %F' % (score))
+
+    f1_scores.append(score)
+    recall_scores.append(rec)
+    precision_scores.append(prec)
+    c_val.append(clf.best_estimator_.get_params()['classifier__C'])
+    penalty_fun.append(clf.best_estimator_.get_params()['classifier__penalty'])
+
+    # print('Best features:', clf.best_estimator_.get_params())
 
 
-    print('Best features:', clf.best_estimator_.get_params())
-#Naive Bayes Classifier
-
-
-
-#score = f1_score(Y_test, hypo, average='macro')
-
-#print('F1_Measure: %F' % (score1))
+for i in range(len(f1_scores)):
+    print('---------------------------')
+    print("F: " + str(f1_scores[i]))
+    print("Recall: " + str(recall_scores[i]))
+    print("Precision: " + str(precision_scores[i]))
+    print("C = " + str(c_val[i]))
+    print(penalty_fun[i])
